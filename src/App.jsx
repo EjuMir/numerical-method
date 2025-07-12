@@ -26,9 +26,9 @@ const IntegratedDashboard = () => {
   const teamMembers = [
     {
       id: 1,
-      name: "Sarah Chen",
+      name: "Sayem Ahamed",
       role: "Lead Data Scientist",
-      avatar: "🧑‍💻",
+      avatar: "🧑",
       email: "sarah.chen@company.com",
       phone: "+1 (555) 123-4567",
       location: "San Francisco, CA",
@@ -61,7 +61,7 @@ const IntegratedDashboard = () => {
     },
     {
       id: 2,
-      name: "Marcus Rodriguez",
+      name: "Turja Dutta",
       role: "Full Stack Developer",
       avatar: "👨‍💻",
       email: "marcus.rodriguez@company.com",
@@ -96,7 +96,7 @@ const IntegratedDashboard = () => {
     },
     {
       id: 3,
-      name: "Emily Watson",
+      name: "Mir Md. Tarhimul Quader",
       role: "UX/UI Designer",
       avatar: "🎨",
       email: "emily.watson@company.com",
@@ -131,7 +131,7 @@ const IntegratedDashboard = () => {
     },
     {
       id: 4,
-      name: "David Kim",
+      name: "Mir Md. Ejajul Haque Eju",
       role: "DevOps Engineer",
       avatar: "⚙️",
       email: "david.kim@company.com",
@@ -387,7 +387,7 @@ const IntegratedDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-white">📊 Dashboard Suite</div>
+            <div className="text-2xl font-bold text-white">📊 CurveCraft</div>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -438,7 +438,7 @@ const IntegratedDashboard = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-white mb-6 animate-pulse">
-            Welcome to Dashboard Suite
+            Welcome to Dashboard
           </h1>
           <p className="text-2xl text-white/80 mb-12">
             Explore our integrated analytics and visualization tools
