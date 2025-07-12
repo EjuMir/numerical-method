@@ -1,12 +1,51 @@
-# React + Vite
+# 📊 Curve Fitting Visualization Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive web application for visualizing different curve fitting methods (like linear, polynomial, exponential, and power law). Designed for educational use to help users better understand how curves are fitted to data.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Upload or manually enter data points
+- Visualize different curve fitting models
+- Adjust parameters and see real-time updates
+- Compare fitting methods side-by-side
+- Export graphs and equations
+- Educational explanations and tutorials
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+
+- React.js
+- Chart.js or D3.js (for visualization)
+- Tailwind CSS (optional styling)
+- Math.js / NumPy (for calculations)
+- Vite / CRA (depending on setup)
+
+---
+
+## 📦 Installation & Setup
+
+You can use **pnpm**, **npm**, or **yarn** to install and run this project.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/curve-fitting-visualization.git
+cd curve-fitting-visualization
+```
+### 2. Install dependencies
+* Using pnpm:
+`pnpm install`
+* Using npm:
+`npm install`
+* Using yarn:
+`yarn install`
+### 3. Start the development server
+* Using pnpm:
+`pnpm dev`
+* Using npm:
+`npm run dev`
+* Using yarn:
+`yarn dev`
+
+The app will be available at http://localhost:5173.
