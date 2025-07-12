@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, AreaChart, Area } from 'recharts';
 import { Plus, Minus, Download, Code, BarChart3, Database, BookOpen, Users, Star, Trophy, TrendingUp, Calendar, Clock, Target, Award, Mail, Phone, MapPin, Github, Linkedin, Coffee, Zap, Home, Calculator } from 'lucide-react';
 
@@ -169,10 +169,15 @@ const IntegratedDashboard = () => {
   // Curve Fitting Functions
   const linearRegression = (points) => {
     const n = points.length;
-    const sumX = points.reduce((sum, p) => sum + p.x, 0);
-    const sumY = points.reduce((sum, p) => sum + p.y, 0);
-    const sumXY = points.reduce((sum, p) => sum + p.x * p.y, 0);
-    const sumX2 = points.reduce((sum, p) => sum + p.x * p.x, 0);
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    
+    // Calculate sums using normal iteration
+    for (let i = 0; i < n; i++) {
+      sumX += points[i].x;
+      sumY += points[i].y;
+      sumXY += points[i].x * points[i].y;
+      sumX2 += points[i].x * points[i].x;
+    }
     
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
@@ -318,15 +323,22 @@ const IntegratedDashboard = () => {
 
   const calculateResiduals = (method) => {
     const { model } = generateCurveData(method);
-    return dataPoints.map(point => {
+    const residuals = [];
+    
+    // Calculate residuals using normal iteration
+    for (let i = 0; i < dataPoints.length; i++) {
+      const point = dataPoints[i];
       let predicted;
+      
       switch (method) {
         case 'linear':
           predicted = model.slope * point.x + model.intercept;
           break;
         case 'polynomial':
-          predicted = model.coefficients.reduce((sum, coeff, i) => 
-            sum + coeff * Math.pow(point.x, i), 0);
+          predicted = 0;
+          for (let j = 0; j < model.coefficients.length; j++) {
+            predicted += model.coefficients[j] * Math.pow(point.x, j);
+          }
           break;
         case 'exponential':
           predicted = model.a * Math.exp(model.b * point.x);
@@ -335,14 +347,39 @@ const IntegratedDashboard = () => {
           predicted = model.a * Math.pow(point.x, model.b);
           break;
       }
-      return { x: point.x, y: point.y, predicted, residual: point.y - predicted };
-    });
+      
+      residuals.push({
+        x: point.x,
+        y: point.y,
+        predicted: predicted,
+        residual: point.y - predicted
+      });
+    }
+    
+    return residuals;
   };
 
   const calculateRSquared = (residuals) => {
-    const meanY = dataPoints.reduce((sum, p) => sum + p.y, 0) / dataPoints.length;
-    const ssRes = residuals.reduce((sum, r) => sum + r.residual * r.residual, 0);
-    const ssTot = dataPoints.reduce((sum, p) => sum + Math.pow(p.y - meanY, 2), 0);
+    // Calculate mean Y using normal iteration
+    let sumY = 0;
+    for (let i = 0; i < dataPoints.length; i++) {
+      sumY += dataPoints[i].y;
+    }
+    const meanY = sumY / dataPoints.length;
+    
+    // Calculate sum of squared residuals and total sum of squares
+    let ssRes = 0;
+    let ssTot = 0;
+    
+    for (let i = 0; i < residuals.length; i++) {
+      ssRes += residuals[i].residual * residuals[i].residual;
+    }
+    
+    for (let i = 0; i < dataPoints.length; i++) {
+      const diff = dataPoints[i].y - meanY;
+      ssTot += diff * diff;
+    }
+    
     return 1 - (ssRes / ssTot);
   };
 
@@ -358,26 +395,275 @@ const IntegratedDashboard = () => {
     setDataPoints(dataPoints.filter((_, i) => i !== index));
   };
 
-  // Team Dashboard Functions
-  const teamMetrics = {
-    totalProjects: teamMembers.reduce((sum, member) => sum + member.projects, 0),
-    totalTasks: teamMembers.reduce((sum, member) => sum + member.completedTasks, 0),
-    averageRating: (teamMembers.reduce((sum, member) => sum + member.rating, 0) / teamMembers.length).toFixed(1),
-    averageExperience: (teamMembers.reduce((sum, member) => sum + member.experience, 0) / teamMembers.length).toFixed(1)
+  // Chart Download Function
+  const downloadChart = (method, title) => {
+    const chartContainer = document.getElementById(`chart-${method}`);
+    if (!chartContainer) return;
+
+    // Create a new canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    // Fill background
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Get chart data
+    const { curveData, model } = generateCurveData(method);
+    const residuals = calculateResiduals(method);
+    const rSquared = calculateRSquared(residuals);
+    
+    // Calculate chart dimensions
+    const margin = { top: 80, right: 80, bottom: 80, left: 80 };
+    const chartWidth = canvas.width - margin.left - margin.right;
+    const chartHeight = canvas.height - margin.top - margin.bottom;
+    
+    // Get data bounds using normal iteration
+    let xMin = dataPoints[0].x;
+    let xMax = dataPoints[0].x;
+    let yMin = dataPoints[0].y;
+    let yMax = dataPoints[0].y;
+    
+    // Find min/max for data points
+    for (let i = 1; i < dataPoints.length; i++) {
+      if (dataPoints[i].x < xMin) xMin = dataPoints[i].x;
+      if (dataPoints[i].x > xMax) xMax = dataPoints[i].x;
+      if (dataPoints[i].y < yMin) yMin = dataPoints[i].y;
+      if (dataPoints[i].y > yMax) yMax = dataPoints[i].y;
+    }
+    
+    // Find min/max for curve data
+    for (let i = 0; i < curveData.length; i++) {
+      if (curveData[i].x < xMin) xMin = curveData[i].x;
+      if (curveData[i].x > xMax) xMax = curveData[i].x;
+      if (curveData[i].y < yMin) yMin = curveData[i].y;
+      if (curveData[i].y > yMax) yMax = curveData[i].y;
+    }
+    
+    // Add some padding
+    const xPadding = (xMax - xMin) * 0.1;
+    const yPadding = (yMax - yMin) * 0.1;
+    
+    // Scale functions
+    const xScale = (x) => margin.left + ((x - (xMin - xPadding)) / ((xMax + xPadding) - (xMin - xPadding))) * chartWidth;
+    const yScale = (y) => margin.top + chartHeight - ((y - (yMin - yPadding)) / ((yMax + yPadding) - (yMin - yPadding))) * chartHeight;
+    
+    // Draw grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1;
+    
+    // Vertical grid lines
+    for (let i = 0; i <= 10; i++) {
+      const x = margin.left + (i * chartWidth) / 10;
+      ctx.beginPath();
+      ctx.moveTo(x, margin.top);
+      ctx.lineTo(x, margin.top + chartHeight);
+      ctx.stroke();
+    }
+    
+    // Horizontal grid lines
+    for (let i = 0; i <= 10; i++) {
+      const y = margin.top + (i * chartHeight) / 10;
+      ctx.beginPath();
+      ctx.moveTo(margin.left, y);
+      ctx.lineTo(margin.left + chartWidth, y);
+      ctx.stroke();
+    }
+    
+    // Draw axes
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 2;
+    
+    // X-axis
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top + chartHeight);
+    ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
+    ctx.stroke();
+    
+    // Y-axis
+    ctx.beginPath();
+    ctx.moveTo(margin.left, margin.top);
+    ctx.lineTo(margin.left, margin.top + chartHeight);
+    ctx.stroke();
+    
+    // Draw fitted curve using normal iteration
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    
+    for (let i = 0; i < curveData.length; i++) {
+      const point = curveData[i];
+      const x = xScale(point.x);
+      const y = yScale(point.y);
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    ctx.stroke();
+    
+    // Draw data points using normal iteration
+    ctx.fillStyle = '#ef4444';
+    for (let i = 0; i < dataPoints.length; i++) {
+      const point = dataPoints[i];
+      const x = xScale(point.x);
+      const y = yScale(point.y);
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Add white border
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    
+    // Draw residuals if enabled using normal iteration
+    if (showResiduals) {
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      
+      for (let i = 0; i < residuals.length; i++) {
+        const point = residuals[i];
+        const x = xScale(point.x);
+        const y1 = yScale(point.y);
+        const y2 = yScale(point.predicted);
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y1);
+        ctx.lineTo(x, y2);
+        ctx.stroke();
+      }
+      
+      ctx.setLineDash([]);
+    }
+    
+    // Add title
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, canvas.width / 2, 40);
+    
+    // Add equation
+    ctx.font = '18px Arial';
+    ctx.fillText(model.equation, canvas.width / 2, canvas.height - 40);
+    
+    // Add R-squared
+    ctx.fillText(`R² = ${rSquared.toFixed(4)}`, canvas.width / 2, canvas.height - 15);
+    
+    // Add legend
+    ctx.textAlign = 'left';
+    ctx.font = '14px Arial';
+    
+    // Data points legend
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(margin.left + 20, 30, 6, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.fillText('Data Points', margin.left + 35, 35);
+    
+    // Fitted curve legend
+    ctx.strokeStyle = '#60a5fa';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(margin.left + 150, 30);
+    ctx.lineTo(margin.left + 180, 30);
+    ctx.stroke();
+    ctx.fillStyle = 'white';
+    ctx.fillText('Fitted Curve', margin.left + 190, 35);
+    
+    // Add residuals legend if shown
+    if (showResiduals) {
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(margin.left + 300, 30);
+      ctx.lineTo(margin.left + 330, 30);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'white';
+      ctx.fillText('Residuals', margin.left + 340, 35);
+    }
+    
+    // Download the canvas as image
+    const link = document.createElement('a');
+    link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-chart.png`;
+    link.href = canvas.toDataURL();
+    link.click();
   };
 
-  const skillsData = teamMembers.reduce((acc, member) => {
-    member.skills.forEach(skill => {
-      acc[skill] = (acc[skill] || 0) + 1;
-    });
-    return acc;
-  }, {});
+  // Team Dashboard Functions
+  const teamMetrics = {
+    totalProjects: (() => {
+      let total = 0;
+      for (let i = 0; i < teamMembers.length; i++) {
+        total += teamMembers[i].projects;
+      }
+      return total;
+    })(),
+    totalTasks: (() => {
+      let total = 0;
+      for (let i = 0; i < teamMembers.length; i++) {
+        total += teamMembers[i].completedTasks;
+      }
+      return total;
+    })(),
+    averageRating: (() => {
+      let total = 0;
+      for (let i = 0; i < teamMembers.length; i++) {
+        total += teamMembers[i].rating;
+      }
+      return (total / teamMembers.length).toFixed(1);
+    })(),
+    averageExperience: (() => {
+      let total = 0;
+      for (let i = 0; i < teamMembers.length; i++) {
+        total += teamMembers[i].experience;
+      }
+      return (total / teamMembers.length).toFixed(1);
+    })()
+  };
 
-  const skillsChartData = Object.entries(skillsData).map(([skill, count]) => ({
-    skill,
-    count,
-    percentage: (count / teamMembers.length * 100).toFixed(1)
-  })).sort((a, b) => b.count - a.count);
+  const skillsData = (() => {
+    const skills = {};
+    for (let i = 0; i < teamMembers.length; i++) {
+      const member = teamMembers[i];
+      for (let j = 0; j < member.skills.length; j++) {
+        const skill = member.skills[j];
+        skills[skill] = (skills[skill] || 0) + 1;
+      }
+    }
+    return skills;
+  })();
+
+  const skillsChartData = (() => {
+    const entries = Object.entries(skillsData);
+    const chartData = [];
+    
+    for (let i = 0; i < entries.length; i++) {
+      const [skill, count] = entries[i];
+      chartData.push({
+        skill,
+        count,
+        percentage: (count / teamMembers.length * 100).toFixed(1)
+      });
+    }
+    
+    // Sort by count (descending) using normal iteration
+    chartData.sort((a, b) => b.count - a.count);
+    return chartData;
+  })();
 
   const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -787,8 +1073,20 @@ plt.show()`;
     return (
       <div className={`bg-gradient-to-br ${color} rounded-2xl shadow-2xl border border-white/20 backdrop-blur-lg`}>
         <div className="p-6">
-          <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
-          <p className="text-white/90 mb-4">{description}</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
+              <p className="text-white/90">{description}</p>
+            </div>
+            <button
+              onClick={() => downloadChart(method, title)}
+              className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg transition-colors flex items-center space-x-2 shadow-lg"
+              title="Download Chart"
+            >
+              <Download className="w-5 h-5" />
+              <span>Download Chart</span>
+            </button>
+          </div>
           
           {/* Tab Navigation */}
           <div className="flex space-x-2 mb-6">
@@ -816,7 +1114,7 @@ plt.show()`;
           {/* Tab Content */}
           {activeTab === 'visualization' && (
             <div className="space-y-4">
-              <div className="h-80 bg-white/10 rounded-lg p-4">
+              <div id={`chart-${method}`} className="h-80 bg-white/10 rounded-lg p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
@@ -882,7 +1180,13 @@ plt.show()`;
                 <p className="text-white/90 font-mono text-lg mb-2">{model.equation}</p>
                 <p className="text-white/80">R² = {rSquared.toFixed(4)}</p>
                 <p className="text-white/80">
-                  MAE = {(residuals.reduce((sum, r) => sum + Math.abs(r.residual), 0) / residuals.length).toFixed(4)}
+                  MAE = {(() => {
+                    let sum = 0;
+                    for (let i = 0; i < residuals.length; i++) {
+                      sum += Math.abs(residuals[i].residual);
+                    }
+                    return (sum / residuals.length).toFixed(4);
+                  })()}
                 </p>
               </div>
             </div>
@@ -909,16 +1213,23 @@ plt.show()`;
                     </tr>
                   </thead>
                   <tbody>
-                    {residuals.map((point, index) => (
-                      <tr key={index} className="border-b border-white/10">
-                        <td className="text-white py-1">{point.x}</td>
-                        <td className="text-white py-1">{point.y.toFixed(3)}</td>
-                        <td className="text-white py-1">{point.predicted.toFixed(3)}</td>
-                        <td className={`py-1 ${point.residual > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {point.residual.toFixed(3)}
-                        </td>
-                      </tr>
-                    ))}
+                    {(() => {
+                      const rows = [];
+                      for (let i = 0; i < residuals.length; i++) {
+                        const point = residuals[i];
+                        rows.push(
+                          <tr key={i} className="border-b border-white/10">
+                            <td className="text-white py-1">{point.x}</td>
+                            <td className="text-white py-1">{point.y.toFixed(3)}</td>
+                            <td className="text-white py-1">{point.predicted.toFixed(3)}</td>
+                            <td className={`py-1 ${point.residual > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {point.residual.toFixed(3)}
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return rows;
+                    })()}
                   </tbody>
                 </table>
               </div>
@@ -931,7 +1242,13 @@ plt.show()`;
                 <div className="bg-white/10 rounded-lg p-3">
                   <h5 className="text-white font-medium mb-1">Mean Absolute Error</h5>
                   <p className="text-2xl font-bold text-white">
-                    {(residuals.reduce((sum, r) => sum + Math.abs(r.residual), 0) / residuals.length).toFixed(4)}
+                    {(() => {
+                      let sum = 0;
+                      for (let i = 0; i < residuals.length; i++) {
+                        sum += Math.abs(residuals[i].residual);
+                      }
+                      return (sum / residuals.length).toFixed(4);
+                    })()}
                   </p>
                 </div>
               </div>
@@ -1010,17 +1327,24 @@ plt.show()`;
               <div>
                 <h4 className="text-lg text-white mb-3">Current Data Points</h4>
                 <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
-                  {dataPoints.map((point, index) => (
-                    <div key={index} className="flex items-center bg-white/20 rounded-lg px-3 py-1">
-                      <span className="text-white text-sm">({point.x}, {point.y})</span>
-                      <button
-                        onClick={() => removeDataPoint(index)}
-                        className="ml-2 text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+                  {(() => {
+                    const pointElements = [];
+                    for (let i = 0; i < dataPoints.length; i++) {
+                      const point = dataPoints[i];
+                      pointElements.push(
+                        <div key={i} className="flex items-center bg-white/20 rounded-lg px-3 py-1">
+                          <span className="text-white text-sm">({point.x}, {point.y})</span>
+                          <button
+                            onClick={() => removeDataPoint(i)}
+                            className="ml-2 text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    }
+                    return pointElements;
+                  })()}
                 </div>
               </div>
             </div>
@@ -1127,19 +1451,32 @@ plt.show()`;
         </div>
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {member.skills.slice(0, 3).map((skill, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-purple-500/30 text-purple-200 rounded-full text-xs"
-            >
-              {skill}
-            </span>
-          ))}
-          {member.skills.length > 3 && (
-            <span className="px-2 py-1 bg-white/20 text-white/80 rounded-full text-xs">
-              +{member.skills.length - 3} more
-            </span>
-          )}
+          {(() => {
+            const skillElements = [];
+            const skillsToShow = Math.min(3, member.skills.length);
+            
+            for (let i = 0; i < skillsToShow; i++) {
+              const skill = member.skills[i];
+              skillElements.push(
+                <span
+                  key={i}
+                  className="px-2 py-1 bg-purple-500/30 text-purple-200 rounded-full text-xs"
+                >
+                  {skill}
+                </span>
+              );
+            }
+            
+            if (member.skills.length > 3) {
+              skillElements.push(
+                <span key="more" className="px-2 py-1 bg-white/20 text-white/80 rounded-full text-xs">
+                  +{member.skills.length - 3} more
+                </span>
+              );
+            }
+            
+            return skillElements;
+          })()}
         </div>
         
         <div className="text-white/80 text-sm line-clamp-2">
@@ -1231,14 +1568,21 @@ plt.show()`;
 
             {/* Team Members Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {teamMembers.map((member) => (
-                <MemberCard
-                  key={member.id}
-                  member={member}
-                  isSelected={selectedMember?.id === member.id}
-                  onClick={setSelectedMember}
-                />
-              ))}
+              {(() => {
+                const memberCards = [];
+                for (let i = 0; i < teamMembers.length; i++) {
+                  const member = teamMembers[i];
+                  memberCards.push(
+                    <MemberCard
+                      key={member.id}
+                      member={member}
+                      isSelected={selectedMember?.id === member.id}
+                      onClick={setSelectedMember}
+                    />
+                  );
+                }
+                return memberCards;
+              })()}
             </div>
           </div>
         )}
@@ -1309,14 +1653,21 @@ plt.show()`;
         {teamView === 'members' && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {teamMembers.map((member) => (
-                <MemberCard
-                  key={member.id}
-                  member={member}
-                  isSelected={false}
-                  onClick={setSelectedMember}
-                />
-              ))}
+              {(() => {
+                const memberCards = [];
+                for (let i = 0; i < teamMembers.length; i++) {
+                  const member = teamMembers[i];
+                  memberCards.push(
+                    <MemberCard
+                      key={member.id}
+                      member={member}
+                      isSelected={false}
+                      onClick={setSelectedMember}
+                    />
+                  );
+                }
+                return memberCards;
+              })()}
             </div>
           </div>
         )}
