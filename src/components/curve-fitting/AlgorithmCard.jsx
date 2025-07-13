@@ -21,11 +21,217 @@ const AlgorithmCard = ({
     const rSquared = calculateRSquared(dataPoints, residuals);
 
     const getPythonCode = () => {
-        // ... (getPythonCode logic from App.jsx)
+      switch (method) {
+        case 'linear':
+          return `import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+# Data points
+X = np.array([[1], [2], [3], [4], [5]])
+y = np.array([2.1, 3.9, 6.2, 7.8, 10.1])
+
+# Create and fit the model
+model = LinearRegression()
+model.fit(X, y)
+
+# Get coefficients
+slope = model.coef_[0]
+intercept = model.intercept_
+
+# Make predictions
+y_pred = model.predict(X)
+
+# Calculate R-squared
+r_squared = model.score(X, y)
+
+print(f"Equation: y = {slope:.3f}x + {intercept:.3f}")
+print(f"R-squared: {r_squared:.4f}")
+
+# Plot results
+plt.scatter(X, y, color='red', label='Data points')
+plt.plot(X, y_pred, color='blue', label='Fitted line')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.show()`;
+
+        case 'polynomial':
+          return `import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.pipeline import Pipeline
+
+# Data points
+X = np.array([[1], [2], [3], [4], [5]])
+y = np.array([2.1, 3.9, 6.2, 7.8, 10.1])
+
+# Create polynomial features and fit
+degree = ${polynomialDegree}
+poly_model = Pipeline([
+    ('poly', PolynomialFeatures(degree=degree)),
+    ('linear', LinearRegression())
+])
+
+poly_model.fit(X, y)
+
+# Make predictions
+y_pred = poly_model.predict(X)
+
+# Calculate R-squared
+r_squared = poly_model.score(X, y)
+
+print(f"Polynomial degree: {degree}")
+print(f"R-squared: {r_squared:.4f}")
+
+# Plot results
+X_plot = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
+y_plot = poly_model.predict(X_plot)
+
+plt.scatter(X, y, color='red', label='Data points')
+plt.plot(X_plot, y_plot, color='blue', label=f'Polynomial fit (degree {degree})')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.show()`;
+
+        case 'exponential':
+          return `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+# Data points
+X = np.array([1, 2, 3, 4, 5])
+y = np.array([2.1, 3.9, 6.2, 7.8, 10.1])
+
+# Define exponential function
+def exponential_func(x, a, b):
+    return a * np.exp(b * x)
+
+# Fit the curve
+popt, pcov = curve_fit(exponential_func, X, y)
+a, b = popt
+
+# Make predictions
+y_pred = exponential_func(X, a, b)
+
+# Calculate R-squared
+ss_res = np.sum((y - y_pred) ** 2)
+ss_tot = np.sum((y - np.mean(y)) ** 2)
+r_squared = 1 - (ss_res / ss_tot)
+
+print(f"Equation: y = {a:.3f}e^({b:.3f}x)")
+print(f"R-squared: {r_squared:.4f}")
+
+# Plot results
+X_plot = np.linspace(X.min(), X.max(), 100)
+y_plot = exponential_func(X_plot, a, b)
+
+plt.scatter(X, y, color='red', label='Data points')
+plt.plot(X_plot, y_plot, color='blue', label='Exponential fit')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.show()`;
+
+        case 'power':
+          return `import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+# Data points
+X = np.array([1, 2, 3, 4, 5])
+y = np.array([2.1, 3.9, 6.2, 7.8, 10.1])
+
+# Define power law function
+def power_law_func(x, a, b):
+    return a * np.power(x, b)
+
+# Fit the curve
+popt, pcov = curve_fit(power_law_func, X, y)
+a, b = popt
+
+# Make predictions
+y_pred = power_law_func(X, a, b)
+
+# Calculate R-squared
+ss_res = np.sum((y - y_pred) ** 2)
+ss_tot = np.sum((y - np.mean(y)) ** 2)
+r_squared = 1 - (ss_res / ss_tot)
+
+print(f"Equation: y = {a:.3f}x^{b:.3f}")
+print(f"R-squared: {r_squared:.4f}")
+
+# Plot results
+X_plot = np.linspace(X.min(), X.max(), 100)
+y_plot = power_law_func(X_plot, a, b)
+
+plt.scatter(X, y, color='red', label='Data points')
+plt.plot(X_plot, y_plot, color='blue', label='Power law fit')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+plt.show()`;
+
+        default:
+          return '';
+      }
     };
 
     const getTheory = () => {
-        // ... (getTheory logic from App.jsx)
+      switch (method) {
+        case 'linear':
+          return {
+            description: "Linear regression fits a straight line through the data points using the least squares method. It minimizes the sum of squared residuals.",
+            formula: "y = mx + b",
+            mathematics: [
+              "slope (m) = (n∑xy - ∑x∑y) / (n∑x² - (∑x)²)",
+              "intercept (b) = (∑y - m∑x) / n",
+              "where n is the number of data points"
+            ],
+            applications: "Used for simple linear relationships, trend analysis, and as a baseline model."
+          };
+
+        case 'polynomial':
+          return {
+            description: "Polynomial regression fits a polynomial curve of specified degree. Higher degrees can capture more complex patterns but may overfit.",
+            formula: `y = a₀ + a₁x + a₂x² + ... + a${polynomialDegree}x^${polynomialDegree}`,
+            mathematics: [
+              "Solved using normal equations: (X'X)a = X'Y",
+              "X is the Vandermonde matrix with powers of x",
+              "Coefficients found via Gaussian elimination"
+            ],
+            applications: "Useful for non-linear relationships, curve fitting in physics, and polynomial interpolation."
+          };
+
+        case 'exponential':
+          return {
+            description: "Exponential fitting models exponential growth or decay patterns. Common in population dynamics, radioactive decay, and compound interest.",
+            formula: "y = ae^(bx)",
+            mathematics: [
+              "Transform to linear: ln(y) = ln(a) + bx",
+              "Apply linear regression to (x, ln(y))",
+              "Back-transform: a = e^(intercept), b = slope"
+            ],
+            applications: "Population growth, radioactive decay, bacterial growth, compound interest calculations."
+          };
+
+        case 'power':
+          return {
+            description: "Power law fitting models relationships where one variable is proportional to a power of another. Common in physics and scaling laws.",
+            formula: "y = ax^b",
+            mathematics: [
+              "Transform to linear: ln(y) = ln(a) + b·ln(x)",
+              "Apply linear regression to (ln(x), ln(y))",
+              "Back-transform: a = e^(intercept), b = slope"
+            ],
+            applications: "Scaling laws, allometric relationships, fractal geometry, power-law distributions."
+          };
+
+        default:
+          return { description: "", formula: "", mathematics: [], applications: "" };
+      }
     };
 
     const theory = getTheory();
