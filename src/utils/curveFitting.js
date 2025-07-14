@@ -195,14 +195,14 @@ export const downloadChart = (method, title, dataPoints, showResiduals, polynomi
     canvas.width = 800;
     canvas.height = 600;
     
-    ctx.fillStyle = '#1e293b';
+    ctx.fillStyle = '#1e293b'; // Dark blue background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     const { curveData, model } = generateCurveData(dataPoints, method, polynomialDegree);
     const residuals = calculateResiduals(dataPoints, method, polynomialDegree);
     const rSquared = calculateRSquared(dataPoints, residuals);
     
-    const margin = { top: 80, right: 80, bottom: 80, left: 80 };
+    const margin = { top: 60, right: 50, bottom: 80, left: 60 };
     const chartWidth = canvas.width - margin.left - margin.right;
     const chartHeight = canvas.height - margin.top - margin.bottom;
     
@@ -212,15 +212,15 @@ export const downloadChart = (method, title, dataPoints, showResiduals, polynomi
     const yMin = Math.min(...allData.map(p => p.y));
     const yMax = Math.max(...allData.map(p => p.y));
     
-    const xPadding = (xMax - xMin) * 0.1;
-    const yPadding = (yMax - yMin) * 0.1;
+    const xPadding = (xMax - xMin) * 0.1 || 1;
+    const yPadding = (yMax - yMin) * 0.1 || 1;
     
     const xScale = (x) => margin.left + ((x - (xMin - xPadding)) / ((xMax + xPadding) - (xMin - xPadding))) * chartWidth;
     const yScale = (y) => margin.top + chartHeight - ((y - (yMin - yPadding)) / ((yMax + yPadding) - (yMin - yPadding))) * chartHeight;
     
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    // Draw grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
-    
     for (let i = 0; i <= 10; i++) {
       const x = margin.left + (i * chartWidth) / 10;
       ctx.beginPath();
@@ -228,7 +228,6 @@ export const downloadChart = (method, title, dataPoints, showResiduals, polynomi
       ctx.lineTo(x, margin.top + chartHeight);
       ctx.stroke();
     }
-    
     for (let i = 0; i <= 10; i++) {
       const y = margin.top + (i * chartHeight) / 10;
       ctx.beginPath();
@@ -237,38 +236,35 @@ export const downloadChart = (method, title, dataPoints, showResiduals, polynomi
       ctx.stroke();
     }
     
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = 2;
-    
+    // Draw axes
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(margin.left, margin.top + chartHeight);
     ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
     ctx.stroke();
-    
     ctx.beginPath();
     ctx.moveTo(margin.left, margin.top);
     ctx.lineTo(margin.left, margin.top + chartHeight);
     ctx.stroke();
     
+    // Draw fitted curve
     ctx.strokeStyle = '#60a5fa';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    
     curveData.forEach((point, i) => {
       const x = xScale(point.x);
       const y = yScale(point.y);
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     });
     ctx.stroke();
     
-    ctx.fillStyle = '#ef4444';
+    // Draw data points
     dataPoints.forEach(point => {
       const x = xScale(point.x);
       const y = yScale(point.y);
+      ctx.fillStyle = '#ef4444';
       ctx.beginPath();
       ctx.arc(x, y, 6, 0, 2 * Math.PI);
       ctx.fill();
@@ -277,64 +273,46 @@ export const downloadChart = (method, title, dataPoints, showResiduals, polynomi
       ctx.stroke();
     });
     
-    if (showResiduals) {
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      residuals.forEach(point => {
-        const x = xScale(point.x);
-        const y1 = yScale(point.y);
-        const y2 = yScale(point.predicted);
-        ctx.beginPath();
-        ctx.moveTo(x, y1);
-        ctx.lineTo(x, y2);
-        ctx.stroke();
-      });
-      ctx.setLineDash([]);
-    }
-    
+    // Draw Title
     ctx.fillStyle = 'white';
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(title, canvas.width / 2, 40);
+    ctx.fillText(title, canvas.width / 2, margin.top - 20);
     
-    ctx.font = '18px Arial';
-    ctx.fillText(model.equation, canvas.width / 2, canvas.height - 40);
     
-    ctx.fillText(`R² = ${rSquared.toFixed(4)}`, canvas.width / 2, canvas.height - 15);
+    // ** Draw Legend and Equation at the Bottom ** (This is the updated part)
+    const bottomY = canvas.height - 30;
     
-    ctx.textAlign = 'left';
+    // --- Left Side: Legend ---
     ctx.font = '14px Arial';
-    
+    ctx.textAlign = 'left';
+    let currentX = margin.left;
+
+    // Data Points Legend Item
     ctx.fillStyle = '#ef4444';
     ctx.beginPath();
-    ctx.arc(margin.left + 20, 30, 6, 0, 2 * Math.PI);
+    ctx.arc(currentX, bottomY, 5, 0, 2 * Math.PI);
     ctx.fill();
     ctx.fillStyle = 'white';
-    ctx.fillText('Data Points', margin.left + 35, 35);
-    
+    ctx.fillText('Data Points', currentX + 10, bottomY + 5);
+    currentX += 120;
+
+    // Fitted Curve Legend Item
     ctx.strokeStyle = '#60a5fa';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(margin.left + 150, 30);
-    ctx.lineTo(margin.left + 180, 30);
+    ctx.moveTo(currentX, bottomY);
+    ctx.lineTo(currentX + 20, bottomY);
     ctx.stroke();
-    ctx.fillStyle = 'white';
-    ctx.fillText('Fitted Curve', margin.left + 190, 35);
+    ctx.fillText('Fitted Curve', currentX + 25, bottomY + 5);
     
-    if (showResiduals) {
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(margin.left + 300, 30);
-      ctx.lineTo(margin.left + 330, 30);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = 'white';
-      ctx.fillText('Residuals', margin.left + 340, 35);
-    }
+    // --- Right Side: Equation & R-Squared ---
+    ctx.font = '16px Monospace';
+    ctx.textAlign = 'right';
+    const equationText = `${model.equation}   |   R² = ${rSquared.toFixed(4)}`;
+    ctx.fillText(equationText, canvas.width - margin.right, bottomY + 5);
     
+    // Download the canvas as image
     const link = document.createElement('a');
     link.download = `${title.toLowerCase().replace(/\s+/g, '-')}-chart.png`;
     link.href = canvas.toDataURL();
