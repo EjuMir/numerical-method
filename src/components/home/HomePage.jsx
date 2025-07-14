@@ -10,7 +10,7 @@ import {
   Database
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import { teamMembers, teamMetrics } from '../../utils/teamData';
+import { teamMembers } from '../../utils/teamData';
 
 // Sample data for the decorative chart
 const decorativeData = [
@@ -24,6 +24,11 @@ const decorativeData = [
 ];
 
 const HomePage = ({ setCurrentApp }) => {
+  // Derive metrics from the imported teamMembers data
+  const teamMetrics = {
+    totalRepos: teamMembers.reduce((acc, member) => acc + (member.repo_count || 0), 0),
+  };
+
   return (
     <div className="pt-24 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8 text-white">
       <div className="max-w-7xl mx-auto">
@@ -112,7 +117,7 @@ const HomePage = ({ setCurrentApp }) => {
               </div>
             </div>
             <p className="text-white/90 mb-6 text-lg">
-              Comprehensive team management dashboard with member profiles, performance analytics, skill tracking, and project insights.
+              Comprehensive team management dashboard with member profiles and analytics.
             </p>
             <div className="flex items-center space-x-4 mb-6">
               <div className="bg-white/10 rounded-lg p-3">
@@ -120,12 +125,12 @@ const HomePage = ({ setCurrentApp }) => {
                 <p className="text-white font-semibold">{teamMembers.length}</p>
               </div>
               <div className="bg-white/10 rounded-lg p-3">
-                <span className="text-white/80 text-sm">Projects</span>
-                <p className="text-white font-semibold">{teamMetrics.totalProjects}</p>
+                <span className="text-white/80 text-sm">Total Repos</span>
+                <p className="text-white font-semibold">{teamMetrics.totalRepos}</p>
               </div>
               <div className="bg-white/10 rounded-lg p-3">
                 <span className="text-white/80 text-sm">Avg Rating</span>
-                <p className="text-white font-semibold">{teamMetrics.averageRating}</p>
+                <p className="text-white font-semibold">4.8</p>
               </div>
             </div>
             <div className="flex items-center text-purple-300 font-medium">
@@ -140,42 +145,36 @@ const HomePage = ({ setCurrentApp }) => {
           <h2 className="text-4xl font-bold text-white mb-12 text-center">Key Features of CurveCraft</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            {/* Feature 1: Interactive Visualizations */}
             <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/20 p-6 rounded-xl border border-white/10">
               <BarChart3 className="w-10 h-10 text-blue-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Interactive Visualizations</h3>
               <p className="text-white/80">Engage with real-time, interactive charts that bring your data to life.</p>
             </div>
 
-            {/* Feature 2: Custom Data Inputs */}
             <div className="bg-gradient-to-br from-green-500/10 to-green-500/20 p-6 rounded-xl border border-white/10">
               <Database className="w-10 h-10 text-green-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Custom Data Inputs</h3>
               <p className="text-white/80">Manually add, edit, and remove data points to fit your specific needs.</p>
             </div>
 
-            {/* Feature 3: Python Code Integration */}
             <div className="bg-gradient-to-br from-orange-500/10 to-orange-500/20 p-6 rounded-xl border border-white/10">
               <Code className="w-10 h-10 text-orange-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Code Integration</h3>
               <p className="text-white/80">Access complete Python implementations with detailed explanations for each algorithm.</p>
             </div>
 
-            {/* Feature 4: In-Depth Theory */}
             <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/20 p-6 rounded-xl border border-white/10">
               <BookOpen className="w-10 h-10 text-purple-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">In-Depth Theory</h3>
               <p className="text-white/80">Study the mathematical foundations and applications of each curve fitting method.</p>
             </div>
 
-            {/* Feature 5: Adjustable Parameters */}
             <div className="bg-gradient-to-br from-pink-500/10 to-pink-500/20 p-6 rounded-xl border border-white/10">
               <MousePointerClick className="w-10 h-10 text-pink-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Adjustable Parameters</h3>
               <p className="text-white/80">Fine-tune your analysis by adjusting parameters like the polynomial degree in real-time.</p>
             </div>
 
-            {/* Feature 6: Downloadable Charts */}
             <div className="bg-gradient-to-br from-red-500/10 to-red-500/20 p-6 rounded-xl border border-white/10">
               <Download className="w-10 h-10 text-red-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Downloadable Charts</h3>

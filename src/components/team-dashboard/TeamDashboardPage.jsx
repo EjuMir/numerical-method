@@ -1,31 +1,31 @@
+// src/components/team-dashboard/TeamDashboardPage.jsx
+
 import React, { useState } from 'react';
-import { Users, TrendingUp, Star } from 'lucide-react';
+import { Users, TrendingUp } from 'lucide-react';
+import { teamMembers, skillsChartData, performanceChartData, COLORS } from '../../utils/teamData';
 import TeamOverview from './TeamOverview';
 import Analytics from './Analytics';
-import MemberCard from './MemberCard';
-import { teamMembers, teamMetrics, skillsChartData, COLORS } from '../../utils/teamData';
 
 const TeamDashboardPage = () => {
   const [teamView, setTeamView] = useState('overview');
-  const [selectedMember, setSelectedMember] = useState(null);
 
   return (
-    <div className="pt-20 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="pt-28 min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Team Dashboard
+            Meet the Team
           </h1>
-          <p className="text-xl text-white/80 mb-8">
-            Meet our amazing team and explore their achievements
+          <p className="text-xl text-white/80">
+            The developers behind CurveCraft
           </p>
         </div>
 
-        <div className="flex justify-center space-x-4 mb-8">
+        {/* View Toggles */}
+        <div className="flex justify-center space-x-4 mb-12">
           {[
             { id: 'overview', label: 'Team Overview', icon: Users },
-            { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-            { id: 'members', label: 'Team Members', icon: Star }
+            { id: 'analytics', label: 'Team Analytics', icon: TrendingUp },
           ].map(view => (
             <button
               key={view.id}
@@ -42,32 +42,16 @@ const TeamDashboardPage = () => {
           ))}
         </div>
 
-        {teamView === 'overview' && (
-          <TeamOverview
-            teamMetrics={teamMetrics}
-            teamMembers={teamMembers}
-            selectedMember={selectedMember}
-            setSelectedMember={setSelectedMember}
-          />
-        )}
+        {/* Conditional View Rendering */}
+        {teamView === 'overview' && <TeamOverview teamMembers={teamMembers} />}
+        
         {teamView === 'analytics' && (
           <Analytics
             skillsChartData={skillsChartData}
+            performanceChartData={performanceChartData}
             teamMembers={teamMembers}
             COLORS={COLORS}
           />
-        )}
-        {teamView === 'members' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {teamMembers.map(member => (
-              <MemberCard
-                key={member.id}
-                member={member}
-                isSelected={false}
-                onClick={setSelectedMember}
-              />
-            ))}
-          </div>
         )}
       </div>
     </div>
