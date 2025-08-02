@@ -18,8 +18,8 @@ const TutorialPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Step 1 Card */}
-          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-green-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
-            <div className="border-l-4 border-green-500 pl-6">
+          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
+            <div className="border-l-4 border-blue-500 pl-6">
             <h3 className="text-2xl font-semibold text-white mb-4">Step 1: Choose a Fitting Method</h3>
             <p className="text-white/80 mb-4 flex-grow">
               The "Curve Fitting" page displays cards for each algorithm. You can analyze each one:
@@ -34,8 +34,8 @@ const TutorialPage = () => {
           </div>
 
           {/* Step 2 Card */}
-          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
-          <div className="border-l-4 border-blue-500 pl-6">
+          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-green-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
+          <div className="border-l-4 border-green-500 pl-6">
             <h3 className="text-2xl font-semibold text-white mb-4">Step 2: Input Your Data</h3>
             <p className="text-white/80 mb-4 flex-grow">
               Navigate to the "Curve Fitting" page. Here you can add, edit, or remove data points in the "Data Management" section.
