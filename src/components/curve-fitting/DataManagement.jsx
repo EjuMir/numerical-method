@@ -57,14 +57,14 @@ const DataManagement = ({
               placeholder="X value"
               value={newX}
               onChange={(e) => setNewX(e.target.value)}
-              className="w-full p-2 bg-white/20 text-white rounded-lg border border-white/30 placeholder-white/60 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
+              className="no-spinner w-full p-2 bg-white/20 text-white rounded-lg border border-white/30 placeholder-white/60 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
             />
             <input
               type="number"
               placeholder="Y value"
               value={newY}
               onChange={(e) => setNewY(e.target.value)}
-              className="w-full p-2 bg-white/20 text-white rounded-lg border border-white/30 placeholder-white/60 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
+              className="no-spinner w-full p-2 bg-white/20 text-white rounded-lg border border-white/30 placeholder-white/60 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 outline-none"
             />
             <button
               onClick={addDataPoint}

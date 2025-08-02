@@ -18,25 +18,9 @@ const TutorialPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Step 1 Card */}
-          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
-          <div className="border-l-4 border-blue-500 pl-6">
-            <h3 className="text-2xl font-semibold text-white mb-4">Step 1: Input Your Data</h3>
-            <p className="text-white/80 mb-4 flex-grow">
-              Navigate to the "Curve Fitting" page. Here you can add, edit, or remove data points in the "Data Management" section.
-            </p>
-            <ul className="list-disc list-inside text-white/80 space-y-2">
-              <li>Manually enter X and Y coordinates.</li>
-              <li>Add new points using the "+" button.</li>
-              <li>Remove points by clicking the "-" button.</li>
-              <li>Reset to default sample data at any time.</li>
-            </ul>
-          </div>
-          </div>
-
-          {/* Step 2 Card */}
           <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-green-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
             <div className="border-l-4 border-green-500 pl-6">
-            <h3 className="text-2xl font-semibold text-white mb-4">Step 2: Choose a Fitting Method</h3>
+            <h3 className="text-2xl font-semibold text-white mb-4">Step 1: Choose a Fitting Method</h3>
             <p className="text-white/80 mb-4 flex-grow">
               The "Curve Fitting" page displays cards for each algorithm. You can analyze each one:
             </p>
@@ -48,6 +32,22 @@ const TutorialPage = () => {
             </ul>
           </div>
           </div>
+
+          {/* Step 2 Card */}
+          <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-blue-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
+          <div className="border-l-4 border-blue-500 pl-6">
+            <h3 className="text-2xl font-semibold text-white mb-4">Step 2: Input Your Data</h3>
+            <p className="text-white/80 mb-4 flex-grow">
+              Navigate to the "Curve Fitting" page. Here you can add, edit, or remove data points in the "Data Management" section.
+            </p>
+            <ul className="list-disc list-inside text-white/80 space-y-2">
+              <li>Manually enter X and Y coordinates.</li>
+              <li>Add new points using the "+" button.</li>
+              <li>Remove points by clicking the "-" button.</li>
+              <li>Reset to default sample data at any time.</li>
+            </ul>
+          </div>
+          </div>          
 
           {/* Step 3 Card */}
           <div className="bg-slate-900/40 p-8 rounded-2xl border-2 border-transparent hover:border-yellow-500 transition-all duration-300 transform hover:-translate-y-2 flex flex-col">
